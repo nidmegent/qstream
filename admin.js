@@ -3,7 +3,7 @@ import {onAuthStateChanged,signInWithEmailAndPassword,signOut} from 'https://www
 import {ref,onValue,runTransaction,update,get} from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js';
 
 // Firebase Authentication の「ユーザー UID」に置き換えてください。
-const ADMIN_UID = 'REPLACE_WITH_YOUR_ADMIN_UID';
+const ADMIN_UID = 'IBrHgaO4cxdTbMulaMpWyJuNRYI2';
 const $ = id => document.getElementById(id);
 const root = ref(db,'streamQueue');
 const defaults = {settings:{accepting:true,theme:'#8b5cf6',title:'参加者待機リスト',message:'参加希望は「!参加」とコメント！',youtubeUrl:'',twitchChannel:''},participants:[]};
