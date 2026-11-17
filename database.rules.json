@@ -1,0 +1,8 @@
+{
+  "rules": {
+    "streamQueue": {
+      ".read": "auth != null && auth.uid === 'REPLACE_WITH_YOUR_ADMIN_UID'",
+      ".write": "auth != null && auth.uid === 'REPLACE_WITH_YOUR_ADMIN_UID'"
+    }
+  }
+}
