@@ -1,0 +1,57 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>STREAM QUEUE | OBS Overlay</title>
+  <link rel="stylesheet" href="./overlay.css">
+</head>
+<body>
+  <main class="overlay">
+    <section class="panel">
+      <header class="header">
+        <div class="brand">
+          <span class="dot"></span>
+          STREAM QUEUE
+        </div>
+        <span id="status" class="status">接続中</span>
+      </header>
+
+      <h1 id="title">参加者待機リスト</h1>
+
+      <div class="summary">
+        <div class="summary-item">
+          <span class="small-label">WAITING PLAYERS</span>
+          <div class="count">
+            <strong id="count">0</strong>
+            <span>人</span>
+          </div>
+        </div>
+
+        <div class="summary-item">
+          <span class="small-label">NEXT PLAYER</span>
+          <strong id="nextPlayer">待機なし</strong>
+        </div>
+      </div>
+
+      <div class="list-heading">
+        <span>WAITING LIST</span>
+        <span id="total">0 PLAYERS</span>
+      </div>
+
+      <div id="queue" class="queue" aria-live="polite"></div>
+
+      <div id="empty" class="empty">
+        現在、待機者はいません
+      </div>
+
+      <footer id="message">
+        参加希望は「!参加」とコメント！
+      </footer>
+    </section>
+  </main>
+
+  <script type="module" src="./overlay.js"></script>
+</body>
+</html>
