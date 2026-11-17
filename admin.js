@@ -1,6 +1,7 @@
 import {auth,db} from './firebase-config.js';
 import {onAuthStateChanged,signInWithEmailAndPassword,signOut} from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
 import {ref,onValue,runTransaction,update,get} from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js';
+import './youtube-monitor.js';
 
 // Firebase Authentication の「ユーザー UID」に置き換えてください。
 const ADMIN_UID = 'IBrHgaO4cxdTbMulaMpWyJuNRYI2';
