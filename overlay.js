@@ -15,6 +15,10 @@ let participants = [];
 let previousIds = new Set();
 let firstLoad = true;
 
+function isNow(player) {
+  return player.status === 'now';
+}
+
 function setStatus(text, closed = false) {
   $('status').textContent = text;
   $('status').classList.toggle('closed', closed);
@@ -39,27 +43,37 @@ function applySettings(settings = {}) {
   );
 }
 
-function normalizeParticipants(data) {
-  if (Array.isArray(data)) {
-    return data.filter(p => p && typeof p === 'object');
-  }
+function createPlayer(player, index, animate) {
+  const row = document.createElement('div');
+  row.className = 'player';
 
-  return [];
+  if (index === 0) row.classList.add('next');
+  if (!animate) row.style.animation = 'none';
+
+  const number = document.createElement('span');
+  number.className = 'number';
+  number.textContent = String(index + 1).padStart(2, '0');
+
+  const name = document.createElement('span');
+  name.className = 'player-name';
+  name.textContent = String(player.name ?? '名前なし');
+
+  row.append(number, name);
+  return row;
 }
 
-function renderNextPlayers() {
+function renderNowPlayers(nowPlayers) {
   const container = $('nextPlayer');
   container.replaceChildren();
 
-  if (!participants.length) {
-    container.textContent = '待機なし';
+  if (!nowPlayers.length) {
+    container.textContent = 'プレイ中なし';
     return;
   }
 
   const fragment = document.createDocumentFragment();
 
-  // 全員表示・人数上限なし
-  participants.forEach((player, index) => {
+  nowPlayers.forEach((player, index) => {
     const row = document.createElement('div');
     row.className = 'next-player-item';
 
@@ -80,45 +94,30 @@ function renderNextPlayers() {
   container.append(fragment);
 }
 
-function createPlayer(player, index, animate) {
-  const row = document.createElement('div');
-  row.className = 'player';
-
-  if (index === 0) row.classList.add('next');
-  if (!animate) row.style.animation = 'none';
-
-  const number = document.createElement('span');
-  number.className = 'number';
-  number.textContent = String(index + 1).padStart(2, '0');
-
-  const name = document.createElement('span');
-  name.className = 'player-name';
-  name.textContent = String(player.name ?? '名前なし');
-
-  row.append(number, name);
-  return row;
-}
-
 function renderQueue() {
-  const queue = $('queue');
+  const nowPlayers = participants.filter(isNow);
+  const waitingPlayers = participants.filter(p => !isNow(p));
 
   const nextIds = new Set(
-    participants.map(p => String(p.id))
+    waitingPlayers.map(p => String(p.id))
   );
 
-  const rows = participants.map((player, index) => {
-    const isNew = !firstLoad &&
+  const rows = waitingPlayers.map((player, index) => {
+    const isNew =
+      !firstLoad &&
       !previousIds.has(String(player.id));
 
     return createPlayer(player, index, isNew);
   });
 
-  queue.replaceChildren(...rows);
+  $('queue').replaceChildren(...rows);
 
-  $('total').textContent = `${participants.length} PLAYERS`;
-  renderNextPlayers();
+  $('total').textContent =
+    `${waitingPlayers.length} PLAYERS`;
 
-  $('empty').hidden = participants.length > 0;
+  renderNowPlayers(nowPlayers);
+
+  $('empty').hidden = waitingPlayers.length > 0;
 
   previousIds = nextIds;
   firstLoad = false;
@@ -138,7 +137,12 @@ onValue(
 onValue(
   participantsRef,
   snapshot => {
-    participants = normalizeParticipants(snapshot.val());
+    const data = snapshot.val();
+
+    participants = Array.isArray(data)
+      ? data.filter(p => p && typeof p === 'object')
+      : [];
+
     renderQueue();
   },
   error => {
