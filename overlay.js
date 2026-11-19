@@ -25,16 +25,13 @@ function applySettings(settings = {}) {
     ? settings.theme
     : '#8b5cf6';
 
-  document.documentElement.style.setProperty(
-    '--accent', theme
-  );
+  document.documentElement.style.setProperty('--accent', theme);
 
   $('title').textContent =
     settings.title ?? '参加者待機リスト';
 
   $('message').textContent =
-    settings.message ??
-    '参加希望は「!参加」とコメント！';
+    settings.message ?? '参加希望は「!参加」とコメント！';
 
   setStatus(
     settings.accepting ? '参加受付中' : '受付終了',
@@ -42,12 +39,45 @@ function applySettings(settings = {}) {
   );
 }
 
-function platformLabel(platform) {
-  switch (platform) {
-    case 'youtube': return 'YouTube';
-    case 'twitch': return 'Twitch';
-    default: return '手動登録';
+function normalizeParticipants(data) {
+  if (Array.isArray(data)) {
+    return data.filter(p => p && typeof p === 'object');
   }
+
+  return [];
+}
+
+function renderNextPlayers() {
+  const container = $('nextPlayer');
+  container.replaceChildren();
+
+  if (!participants.length) {
+    container.textContent = '待機なし';
+    return;
+  }
+
+  const fragment = document.createDocumentFragment();
+
+  // 全員表示・人数上限なし
+  participants.forEach((player, index) => {
+    const row = document.createElement('div');
+    row.className = 'next-player-item';
+
+    if (index === 0) row.classList.add('first');
+
+    const number = document.createElement('span');
+    number.className = 'next-player-number';
+    number.textContent = String(index + 1).padStart(2, '0');
+
+    const name = document.createElement('span');
+    name.className = 'next-player-name';
+    name.textContent = String(player.name ?? '名前なし');
+
+    row.append(number, name);
+    fragment.append(row);
+  });
+
+  container.append(fragment);
 }
 
 function createPlayer(player, index, animate) {
@@ -61,27 +91,11 @@ function createPlayer(player, index, animate) {
   number.className = 'number';
   number.textContent = String(index + 1).padStart(2, '0');
 
-  const info = document.createElement('div');
-  info.className = 'player-info';
-
   const name = document.createElement('span');
   name.className = 'player-name';
   name.textContent = String(player.name ?? '名前なし');
 
-  const platform = document.createElement('span');
-  platform.className = 'platform';
-  platform.textContent = platformLabel(player.platform);
-
-  info.append(name, platform);
-  row.append(number, info);
-
-  if (index === 0) {
-    const next = document.createElement('span');
-    next.className = 'next-label';
-    next.textContent = 'NEXT';
-    row.append(next);
-  }
-
+  row.append(number, name);
   return row;
 }
 
@@ -101,14 +115,8 @@ function renderQueue() {
 
   queue.replaceChildren(...rows);
 
-  $('count').textContent = participants.length;
-  $('total').textContent =
-    `${participants.length} PLAYERS`;
-
-  $('nextPlayer').textContent =
-    participants.length
-      ? String(participants[0].name ?? '名前なし')
-      : '待機なし';
+  $('total').textContent = `${participants.length} PLAYERS`;
+  renderNextPlayers();
 
   $('empty').hidden = participants.length > 0;
 
@@ -130,12 +138,7 @@ onValue(
 onValue(
   participantsRef,
   snapshot => {
-    const data = snapshot.val();
-
-    participants = Array.isArray(data)
-      ? data.filter(Boolean)
-      : [];
-
+    participants = normalizeParticipants(snapshot.val());
     renderQueue();
   },
   error => {
