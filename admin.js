@@ -53,7 +53,7 @@ $('loginForm').addEventListener('submit',async e=>{
 $('logout').addEventListener('click',()=>signOut(auth));
 onAuthStateChanged(auth,async user=>{
   if(unsubscribe){unsubscribe();unsubscribe=null;}
-  const allowed=!!user&&user.uid===ADMIN_UID;
+  const allowed = !!user && ADMIN_UIDS.includes(user.uid);
   $('loginPanel').hidden=allowed;$('adminPanel').hidden=!allowed;
   $('connection').textContent=allowed?'Firebase接続中':'未接続';
   if(user&&!allowed){notify('このアカウントには管理者権限がありません。');await signOut(auth);return;}
